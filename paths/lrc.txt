@@ -1,0 +1,3 @@
+../images/lrc1.jpg
+../images/lrc2.jpg
+../images/lrc3.jpg
