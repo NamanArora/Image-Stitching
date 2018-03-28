@@ -84,10 +84,12 @@ def stitchLeft():
         img3 = cv2.drawMatches(img1, kp1, left[i], kp2, matches[:10], None, flags=2)
         plt.imshow(img3), plt.show()
 
-        # Finding homography
-        H = match(img1, left[i], 'left')
+        # Finding homography Index
+        HI = match(img1, left[i], 'left')
         print "homography is \n"
-        print H
+        print HI
+        iHI = np.linalg.inv(HI)
+        print "Inverse Homography :", iHI
 
 
 def populate_data():
