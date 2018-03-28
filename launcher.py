@@ -12,14 +12,33 @@ images = []
 left = []
 right = []
 BF = cv2.BFMatcher(cv2.NORM_L2, crossCheck = False)
+surf = cv2.xfeatures2d.SURF_create()    
+
+#Get keypoints and features
+def getSURFFeatures(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    kp, des = surf.detectAndCompute(gray, None)
+    x1 = [p.pt[0] for p in kp]
+    y1 = [p.pt[1] for p in kp]
+    plt.gray()
+    plt.figure(1)
+    plt.imshow(image)
+    plt.plot(x1, y1, 'r.')
+    plt.title('KeyPoints')
+    plt.show()
+    ret = []
+    ret.append(des)
+    ret.append(kp)
+    return ret
+
 
 
 def stitchLeft():
     img1 = left[0]
     for i in range(1, len(left)):
         # Feature extraction
-        featureSet1 = getFeatures(img1)
-        featureSet2 = getFeatures(left[i])
+        featureSet1 = getSURFFeatures(img1)
+        featureSet2 = getSURFFeatures(left[i])
         desc1 = featureSet1[0]
         desc2 = featureSet2[0]
         kp1 = featureSet1[1]
@@ -47,4 +66,4 @@ if __name__ == '__main__':
     for imageFilePath in imageFilesPath:
         images.append(cv2.resize(cv2.imread(imageFilePath), (480, 320)))
 
-    print images
+    
