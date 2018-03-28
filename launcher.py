@@ -4,6 +4,7 @@
 import sys
 from matplotlib import pyplot as plt
 import cv2
+import numpy as np
 
 # initialize empty lists here
 
@@ -15,9 +16,10 @@ center = None
 BF = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
 count = 0
 centerIdx = 0
-surf = cv2.xfeatures2d.SURF_create()    
+surf = cv2.xfeatures2d.SURF_create()
 
-#Get keypoints and features
+
+# Get keypoints and features
 def getSURFFeatures(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     kp, des = surf.detectAndCompute(gray, None)
@@ -35,6 +37,34 @@ def getSURFFeatures(image):
     return ret
 
 
+def match(i1, i2, direction=None):
+    imageSet1 = getSURFFeatures(i1)
+    imageSet2 = getSURFFeatures(i2)
+    print "Direction : ", direction
+    matches = BF.knnMatch(
+        imageSet2[0],
+        imageSet1[0],
+        k=2
+    )
+    good = []
+    for i, (m, n) in enumerate(matches):
+        if m.distance < 0.7 * n.distance:
+            good.append((m.trainIdx, m.queryIdx))
+
+    if len(good) > 4:
+        pointsCurrent = imageSet2[1]
+        pointsPrevious = imageSet1[1]
+
+        matchedPointsCurrent = np.float32(
+            [pointsCurrent[i].pt for (__, i) in good]
+        )
+        matchedPointsPrev = np.float32(
+            [pointsPrevious[i].pt for (i, __) in good]
+        )
+
+        H, s = cv2.findHomography(matchedPointsCurrent, matchedPointsPrev, cv2.RANSAC, 4)
+        return H
+    return None
 
 
 def stitchLeft():
@@ -55,6 +85,9 @@ def stitchLeft():
         plt.imshow(img3), plt.show()
 
         # Finding homography
+        H = match(img1, left[i], 'left')
+        print "homography is \n"
+        print H
 
 
 def populate_data():
@@ -66,6 +99,8 @@ def populate_data():
         else:
             right.append(images[i])
     print "Image lists prepared"
+    # print left
+    # print right
 
 
 if __name__ == '__main__':
@@ -83,7 +118,7 @@ if __name__ == '__main__':
     for imageFilePath in imageFilesPath:
         images.append(cv2.resize(cv2.imread(imageFilePath), (480, 320)))
 
-    print images
+    # print images
 
     count = len(images)
     populate_data()
