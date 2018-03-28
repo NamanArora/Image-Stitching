@@ -51,7 +51,7 @@ def stitchLeft():
         # Image Matching
         matches = BF.match(desc1, desc2)
         matches = sorted(matches, key=lambda x: x.distance)
-        img3 = cv2.drawMatches(img1, kp1, left[i], kp2, matches[:10], flags=2)
+        img3 = cv2.drawMatches(img1, kp1, left[i], kp2, matches[:10], None, flags=2)
         plt.imshow(img3), plt.show()
 
         # Finding homography
@@ -87,3 +87,4 @@ if __name__ == '__main__':
 
     count = len(images)
     populate_data()
+    stitchLeft()
