@@ -11,7 +11,10 @@ imageFilesPath = []
 images = []
 left = []
 right = []
-BF = cv2.BFMatcher(cv2.NORM_L2, crossCheck = False)
+center = None
+BF = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+count = 0
+centerIdx = 0
 surf = cv2.xfeatures2d.SURF_create()    
 
 #Get keypoints and features
@@ -33,6 +36,7 @@ def getSURFFeatures(image):
 
 
 
+
 def stitchLeft():
     img1 = left[0]
     for i in range(1, len(left)):
@@ -44,13 +48,24 @@ def stitchLeft():
         kp1 = featureSet1[1]
         kp2 = featureSet2[1]
 
-        #Image Matching
-        matches  = BF.match(desc1,desc2)
-        matches = sorted(matches, key = lambda x:x.distance)
-        img3 = cv2.drawMatches(img1,kp1,left[i],kp2,matches[:10], flags=2)       
-        plt.imshow(img3),plt.show()
+        # Image Matching
+        matches = BF.match(desc1, desc2)
+        matches = sorted(matches, key=lambda x: x.distance)
+        img3 = cv2.drawMatches(img1, kp1, left[i], kp2, matches[:10], flags=2)
+        plt.imshow(img3), plt.show()
 
         # Finding homography
+
+
+def populate_data():
+    centerIdx = count / 2
+    center_im = images[centerIdx]
+    for i in range(count):
+        if i <= centerIdx:
+            left.append(images[i])
+        else:
+            right.append(images[i])
+    print "Image lists prepared"
 
 
 if __name__ == '__main__':
@@ -61,9 +76,14 @@ if __name__ == '__main__':
     for path in pathToImagesFile.readlines():
         imageFilesPath.append(path.rstrip('\r\n'))
 
+    pathToImagesFile.close()
+
     print imageFilesPath
 
     for imageFilePath in imageFilesPath:
         images.append(cv2.resize(cv2.imread(imageFilePath), (480, 320)))
 
-    
+    print images
+
+    count = len(images)
+    populate_data()
