@@ -146,6 +146,38 @@ def stitchRight(leftImage):
 
         return leftImage
 
+def mix_and_match(leftStitchedImage, warpedImage):
+    image1y, image1x = leftStitchedImage.shape[:2]
+    image2y, image2x = warpedImage.shape[:2]
+    print leftStitchedImage[-1, -1]
+
+    black_l = np.where(leftStitchedImage == np.array([0, 0, 0]))
+    black_wi = np.where(warpedImage == np.array([0, 0, 0]))
+    print black_l[-1]
+    for i in range(0, image1x):
+        for j in range(0, image1y):
+            try:
+                if (np.array_equal(leftStitchedImage[j, i], np.array([0, 0, 0])) and np.array_equal(warpedImage[j, i],
+                                                                                            np.array([0, 0, 0]))):
+                    warpedImage[j, i] = [0, 0, 0]
+                else:
+                    if np.array_equal(warpedImage[j, i], [0, 0, 0]):
+                        # print "PIXEL"
+                        warpedImage[j, i] = leftStitchedImage[j, i]
+                    else:
+                        if not np.array_equal(leftStitchedImage[j, i], [0, 0, 0]):
+                            bw, gw, rw = warpedImage[j, i]
+                            bl, gl, rl = leftStitchedImage[j, i]
+                            # b = (bl+bw)/2
+                            # g = (gl+gw)/2
+                            # r = (rl+rw)/2
+                            warpedImage[j, i] = [bl, gl, rl]
+            except:
+                pass
+                # cv2.imshow("waRPED mix", warpedImage)
+                # cv2.waitKey()
+    return warpedImage
+
 def populate_data():
     centerIdx = count / 2
     center_im = images[centerIdx]
