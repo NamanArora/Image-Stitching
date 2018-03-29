@@ -66,7 +66,6 @@ def match(i1, i2, direction=None):
         return H
     return None
 
-leftImage=[]
 
 def stitchLeft():
     img1 = left[0]
@@ -123,9 +122,29 @@ def stitchLeft():
         tmp[offsetY:left[i].shape[0]+offsetY, offsetX:left[i].shape[1]+offsetX] = left[i]
         img1 = tmp;
 
-    leftImage = tmp;
-    
+    return tmp
 
+
+def stitchRight(leftImage):
+        for rImage in right:
+            H = match(leftImage, rImage)
+            #cv2.imshow("right Image", rImage)
+            #print "Homography :", H
+            newCord = np.dot(H, np.array([rImage.shape[1], rImage.shape[0], 1]))
+            #print " shapes"
+            #print H.shape, newCord.shape
+            #print newCord
+            newCord = newCord / newCord[-1]
+            newSize = (int(newCord[0]) + leftImage.shape[1], int(newCord[1]) + leftImage.shape[0])
+            tmp = cv2.warpPerspective(rImage, H, newSize)
+            cv2.imshow("tpright", tmp)
+            cv2.waitKey()
+            tmp = mix_and_match(leftImage, tmp)
+            #print "tmp shape", tmp.shape
+            #print "self.leftimage shape=", self.leftImage.shape
+            leftImage = tmp
+
+        return leftImage
 
 def populate_data():
     centerIdx = count / 2
@@ -159,4 +178,8 @@ if __name__ == '__main__':
 
     count = len(images)
     populate_data()
-    stitchLeft()
+    leftImage = stitchLeft()
+    final = stitchRight(leftImage)
+    cv2.imshow("final",final)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
