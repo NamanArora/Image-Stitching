@@ -66,6 +66,7 @@ def match(i1, i2, direction=None):
         return H
     return None
 
+leftImage=[]
 
 def stitchLeft():
     img1 = left[0]
@@ -90,6 +91,40 @@ def stitchLeft():
         print HI
         iHI = np.linalg.inv(HI)
         print "Inverse Homography :", iHI
+
+        # Find final points
+        final = np.dot(iHI , np.array([img1.shape[1], img1.shape[0], 1]))
+        # Normalize the last index to 1
+        final = final/final[-1]
+
+        # Find coordinate shift
+        shift = np.dot(iHI,np.array([0,0,1]))
+        # Normalize
+        shift = shift/shift[-1]
+
+        # Get the offsets 
+        offsetX = abs(int(shift[0]))
+        offsetY = abs(int(shift[1]))
+
+        # Modfy the H to incorporate origin shift
+        iHI[0][-1] += abs(shift[0])
+        iHI[1][-1] += abs(shift[1])
+
+        #Find final points after H shift
+        final = np.dot(iHI , np.array([img1.shape[1], img1.shape[0], 1]))
+
+        # Final image size
+        imgSize = (int(final[0]) + offsetX, int(final[1]) + offsetY)
+
+        # Warp the first img wrt to second
+        tmp = cv2.warpPerspective(img1, iHI, imgSize)
+        cv2.imshow("warped",tmp)
+        cv2.waitKey()
+        tmp[offsetY:left[i].shape[0]+offsetY, offsetX:left[i].shape[1]+offsetX] = left[i]
+        img1 = tmp;
+
+    leftImage = tmp;
+    
 
 
 def populate_data():
