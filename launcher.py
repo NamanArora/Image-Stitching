@@ -13,7 +13,10 @@ images = []
 left = []
 right = []
 center = None
-BF = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+FLANN_INDEX_KDTREE = 0
+index_params = dict(algorithm=0, trees=5)
+search_params = dict(checks=50)
+BF = cv2.FlannBasedMatcher(index_params, search_params)
 count = 0
 centerIdx = 0
 surf = cv2.xfeatures2d.SURF_create()
@@ -80,7 +83,6 @@ def stitchLeft():
 
         # Image Matching
         matches = BF.match(desc1, desc2)
-        matches = sorted(matches, key=lambda x: x.distance)
         img3 = cv2.drawMatches(img1, kp1, left[i], kp2, matches[:10], None, flags=2)
         plt.imshow(img3), plt.show()
 
@@ -212,6 +214,7 @@ if __name__ == '__main__':
     populate_data()
     leftImage = stitchLeft()
     final = stitchRight(leftImage)
+    cv2.imwrite("final.jpg",final)
     cv2.imshow("final",final)
     cv2.waitKey()
     cv2.destroyAllWindows()
