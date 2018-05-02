@@ -206,7 +206,7 @@ if __name__ == '__main__':
     print imageFilesPath
 
     for imageFilePath in imageFilesPath:
-        images.append(cv2.resize(cv2.imread(imageFilePath), (480, 320)))
+        images.append(cv2.imread(imageFilePath))
 
     # print images
 
